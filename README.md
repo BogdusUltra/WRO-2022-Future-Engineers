@@ -1,5 +1,5 @@
 # WRO-2022-Future-Engineers
-main.py is a separate program. She is on pyboard.
+main.py is a separate program. It is on pyboard.
 It exchanges data packets with the qualification.py or final.py program (depending on which program is currently running).
 Pyboard processes the received data and, depending on the values ​​that were in the data packet, changes the servo angle and speed.
 If the button is pressed, then it sends information about it.

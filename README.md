@@ -10,9 +10,9 @@ start_robot.py is a program that creates a separate application that can be used
 To do this, you need to connect to the Raspberry Pi via Wi-Fi (in our case "Car1").
 Then launch the application itself and by pressing the "Connect to robot" button select the ip address of our Raspberry Pi.
 There are several main functions in the application interface.
-1) Load start: allows you to select the software to load and run on your Raspberry Pi.
-2) Start: starts the last programme downloaded to the Raspberry Pi.
-3. stop: finishes execution of the program on Raspberry Pi.
+1. Load start: allows you to select the software to load and run on your Raspberry Pi.
+2. Start: starts the last programme downloaded to the Raspberry Pi.
+3. Stop: finishes execution of the program on Raspberry Pi.
 4. Video: creates a separate window and displays the camera image there.
 The application also reports errors in the program, if any.
 

@@ -39,8 +39,31 @@ Connecting to the pyboard.
 We need to install the main.py file on the pyboard. To do this we need to connect pyboard to a laptop via a miniUSB wire. Open explorer and move the main.py file to pyboard and click "replace".
 
 Connecting to the Raspberry Pi and loading programs.
-First we need to power up the Raspberry Pi and wait for it to fully boot up. The Raspberry Pi will start its Wi-Fi hotspot and we need to connect to it. The Wi-Fi network on our Raspberry Pi is called Car1. After connecting to the Wi-Fi, start PyCharm and run the program start_robot.py. The special application opens and in its upper right corner there is a "Connect to robot" button. You need to click on it and select the suggested ip address. We have connected to the Raspberry Pi. Now we can load the programs there.
-To do that we need to click on the "load start" button. A file selection window will open, select the required program file and click on "open". The application file has been uploaded and started automatically.
+First we need to power up the Raspberry Pi and wait for it to fully boot up. The Raspberry Pi will start its Wi-Fi hotspot and we need to connect to it. The Wi-Fi network on our Raspberry Pi is called Car1.
+
+![1](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/main/readme_images/1.jpg)
+
+After connecting to the Wi-Fi, start PyCharm and run the program start_robot.py.
+
+![2](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/main/readme_images/2.jpg)
+
+The special application opens and in its upper right corner there is a "Connect to robot" button. You need to click on it and select the suggested ip address.
+
+![3](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/main/readme_images/3.jpg)
+
+We have connected to the Raspberry Pi.
+
+![4](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/main/readme_images/4.jpg)
+
+Now we can load the programs there.
+To do that we need to click on the "load start" button. A file selection window will open, select the required program file and click on "open". 
+
+![5](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/main/readme_images/5.jpg)
+
+The application file has been uploaded and started automatically.
+
+![6](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/main/readme_images/6.jpg)
+
 
 
 Running a programme on the Raspberry Pi.

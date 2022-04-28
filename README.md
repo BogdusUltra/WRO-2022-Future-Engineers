@@ -1,4 +1,4 @@
-# WRO-2022-Future-Engineers
+# Description of the algorithms
 main.py is a separate programme. It resides on the pyboard.
 It exchanges data packets with qualification.py or final.py (depending on which program is running on the Raspberry Pi) UART way.
 Pyboard processes the received data and depending on the values that were in the data packet, it changes the servo angle and speed.
@@ -35,10 +35,10 @@ The program uses a sensor to look for red and green objects. If it finds a green
 
 
 
-Connecting to the pyboard.
+# Connecting to the pyboard.
 We need to install the main.py file on the pyboard. To do this we need to connect pyboard to a laptop via a miniUSB wire. Open explorer and move the main.py file to pyboard and click "replace".
 
-Connecting to the Raspberry Pi and loading programs.
+# Connecting to the Raspberry Pi and loading programs.
 First we need to power up the Raspberry Pi and wait for it to fully boot up. The Raspberry Pi will start its Wi-Fi hotspot and we need to connect to it. The Wi-Fi network on our Raspberry Pi is called Car1.
 
 ![1](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/main/readme_images/1.jpg)
@@ -66,6 +66,6 @@ The application file has been uploaded and started automatically.
 
 
 
-Running a programme on the Raspberry Pi.
+# Running a programme on the Raspberry Pi.
 The programmes will start as soon as they are downloaded to the Raspberry Pi using the laptop. But if the robot is restarted, the programme will not start.
 In order to ensure that the program we need is started automatically after the robot is switched on, the autostart.py program must also be preloaded on the Raspberry Pi.

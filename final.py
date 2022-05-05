@@ -17,19 +17,19 @@ fps = 0
 fps1 = 0
 fps_time = 0
 
-xright1, yright1 = 620, 215
+xright1, yright1 = 620, 190
 xright2, yright2 = 640, 480
 
-xleft1, yleft1 = 0, 215
+xleft1, yleft1 = 0, 190
 xleft2, yleft2 = 20, 480
 
-xBl1, yBl1 = 320, 400
-xBl2, yBl2 = 360, 440
+xBl1, yBl1 = 320, 420
+xBl2, yBl2 = 350, 440
 
-xOl1, yOl1 = 280, 400
+xOl1, yOl1 = 290, 420
 xOl2, yOl2 = 320, 440
 
-xObj1, yObj1 = 50, 220
+xObj1, yObj1 = 50, 190
 xObj2, yObj2 = 590, 370
 
 e = 0
@@ -38,12 +38,18 @@ x1 = 1130
 x, y = 300, 200
 w, h = 40, 80
 a = ''
-speed = 25
-rul = 2000
+speed = 35
+max_speed = 35
+min_speed = 35
+t_cube = 0.2
+
+rul = 0
 deg = 0
 sp = 0
-kp = 5
-kd = 3
+kp = 0.3
+kd = 0.2
+kp1 = 0.3
+kd1 = 0.2
 per = 0
 e_old = 0
 sr1 = 0
@@ -53,23 +59,28 @@ rsr = 0
 yred = 0
 ygr = 0
 Objsr = 0
+Object_green = 0
+Object_red = 0
+temp = 0
+t_y = 0
 
 tper = time.time()
 t_obj =time.time()
 t_red = time.time()
 t_green = time.time()
 
+
 lowBl = np.array([93, 64, 21])
 upBl = np.array([112, 255, 97]) #Проверить
 
-lowOl = np.array([15, 75, 7])
-upOl = np.array([51, 256, 188]) #Проверить
+lowOl = np.array([0, 75, 7])
+upOl = np.array([51, 255, 188]) #Проверить
 
-lowObjgreen = np.array([63, 225, 60])
-upObjgreen = np.array([79, 256, 98]) #Проверить
+lowObjgreen = np.array([70, 200, 58])
+upObjgreen = np.array([85, 255, 138]) #Проверить
 
-lowObjred = np.array([0, 88, 86])
-upObjred = np.array([11, 193, 133]) #Проверить
+lowObjred = np.array([0, 140, 6])
+upObjred = np.array([10, 255, 255]) #Проверить
 
 keyboardcontrol = 'None'
 direction = 'None'
@@ -84,40 +95,45 @@ Flag_line = False
 time_button = time.time()
 
 def black_line():
-    global xright1, yright1, xright2, yright2, sr1, max1, sr2
+    global xright1, yright1, xright2, yright2, sr1, sr2, t_black, t_black_1, t_black_2
     datb1 = frame[yleft1:yleft2, xleft1:xleft2]
     dat1 = cv2.GaussianBlur(datb1, (9, 9), cv2.BORDER_DEFAULT)
     gray1 = cv2.cvtColor(dat1, cv2.COLOR_BGR2GRAY)
-    _, maskd1 = cv2.threshold(gray1, 60, 255, cv2.THRESH_BINARY_INV)
+    _, maskd1 = cv2.threshold(gray1, 40, 255, cv2.THRESH_BINARY_INV)
     gray11 = cv2.cvtColor(maskd1, cv2.COLOR_GRAY2BGR)
     frame[yleft1:yleft2, xleft1:xleft2] = gray11
     imd1, contoursd1, hod1 = cv2.findContours(maskd1, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-    max1 = 0
     sr1 = 0
     for contorb1 in contoursd1:
         x1, y1, w1, h1 = cv2.boundingRect(contorb1)
         a1 = cv2.contourArea(contorb1)
-        if a1 > 400:
+        if a1 > 200:
             if y1 + h1 > sr1:
                 sr1 = y1 + h1
                 cv2.rectangle(datb1, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 0), 2)
+    
 
     datb2 = frame[yright1:yright2, xright1:xright2]
     dat2 = cv2.GaussianBlur(datb2, (9, 9), cv2.BORDER_DEFAULT)
     gray2 = cv2.cvtColor(dat2, cv2.COLOR_BGR2GRAY)
-    _, maskd2 = cv2.threshold(gray2, 60, 255, cv2.THRESH_BINARY_INV)
+    _, maskd2 = cv2.threshold(gray2, 40, 255, cv2.THRESH_BINARY_INV)
     gray12 = cv2.cvtColor(maskd2, cv2.COLOR_GRAY2BGR)
     frame[yright1:yright2, xright1:xright2] = gray12
     imd1, contoursd2, hod1 = cv2.findContours(maskd2, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-    max2 = 0
     sr2 = 0
     for contorb2 in contoursd2:
         x2, y2, w2, h2 = cv2.boundingRect(contorb2)
         a1 = cv2.contourArea(contorb2)
-        if a1 > 400:
+        if a1 > 200:
             if y2 + h2 > sr2:
                 sr2 = y2 + h2
                 cv2.rectangle(datb2, (x2, y2), (x2 + w2, y2 + h2), (0, 255, 0), 2)
+
+    if sr2 > 150:
+        sr2 = 150
+
+    if sr1 > 150:
+        sr1 = 150
 
 def blue_line():
     global max2, yBl1, yBl2, xBl1, xBl2, t, per, sr, state, direction, Flag_line_blue, Flag_line
@@ -159,7 +175,7 @@ def orange_line():
 
 
 def object_():
-    global rsr, gsr, xObj1, xObj2, yObj1, yObj2, Flag_obj_green, Flag_obj_red, state, ygr, yred, t_green, t_red
+    global rsr, gsr, xObj1, xObj2, yObj1, yObj2, Flag_obj_green, Flag_obj_red, state, ygr, yred, t_green, t_red, t_cube, Object_red, Object_green, t_y
     cube = frame[yObj1:yObj2, xObj1:xObj2]
     Gauss = cv2.GaussianBlur(cube, (5, 5), cv2.BORDER_DEFAULT)
     hsv = cv2.cvtColor(Gauss, cv2.COLOR_BGR2HSV)
@@ -172,11 +188,12 @@ def object_():
     _, rcnt, h = cv2.findContours(rmask, cv2.RETR_EXTERNAL, cv2.BORDER_DEFAULT)
     if len(rcnt) != 0:
         t_red = time.time()
+        t_y = time.time()
         for i in rcnt:
             x1, y1, w1, h1 = cv2.boundingRect(i)
             a1 = cv2.contourArea(i)
             if a1 > max1:
-                if a1 > 25 and w1 > 40:
+                if a1 > 250:
                     rsr = x1 + w1
                     Flag_obj_red = True
                     max1 = a1 
@@ -185,10 +202,11 @@ def object_():
                     # cv2.circle(cube, ((x1 + y1) // 2), 5, (0, 0, 255), 2)
                     cv2.rectangle(cube, (x1, y1), (x1 + w1, y1 + h1), (0, 0, 255), 2)
     else:
-        if t_red + 0.2 < time.time():
+        if t_red + 0.1 < time.time():
             rsr = 0
             yred = 0
             Flag_obj_red = False
+            Object_red += 1
 
     # gmask = cv2.inRange(cv2.cvtColor(cv2.GaussianBlur(frame[yObj1:yObj2, xObj1:xObj2]), 1), lowObjgreen, upObjred)
     gmask = cv2.inRange(hsv.copy(), lowObjgreen, upObjgreen)
@@ -196,11 +214,12 @@ def object_():
     max1 = 0
     if len(gcnt) != 0:
         t_green = time.time()
+        t_y = time.time()
         for i in gcnt:
             x1, y1, w1, h1 = cv2.boundingRect(i)
             a1 = cv2.contourArea(i)
             if a1 > max1:
-                if a1 > 30:
+                if a1 > 250:
                     max1 = a1
                     gsr = x1
                     ygr = y1+h1
@@ -209,10 +228,11 @@ def object_():
                     # cv2.circle(cube, ((x1 + y1) // 2), 5, (0, 255, 0), 2)
                     cv2.rectangle(cube, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 0), 2)
     else:       
-        if t_green + 0.2 < time.time():
+        if t_green + 0.1 < time.time():
             gsr = 0
             ygr = 0
             Flag_obj_green = False
+            Object_green += 1
     
     if Flag_obj_green ==  True and  Flag_obj_red == True:
         if ygr > yred:
@@ -234,7 +254,7 @@ while True:
         if Flag_button == False:
             message = '9999999$'
         else:
-            message = str(0 + 200) + str(rul + 1000) + '$'
+            message = str(0 + 200) + str(rul + 2000) + '$'
         if ii == 'B=0' and time_button + 1 < time.time():
             keyboardcontrol = 'Off'
             state = 'Move'
@@ -276,44 +296,80 @@ while True:
             if direction == "Blue":
                 blue_line()
 
+                
+
             elif direction == "Orange":
                 orange_line()
             else:
                 blue_line()
                 orange_line()
 
-            e = sr1 - sr2 - 10
+            e = sr1 - sr2 + temp
             if -5 < e < 5:
                 e = 0
-
+            u = e * kp + (e - e_old)*kd
 
             if Flag_obj_red:
-                Objsr  = round(175 - yred * 0.8)
+                if direction == "Orange":
+                    yright1 = 260 
+                    temp = 25
+                else:
+                    yleft1 = 260
+                    temp = 25
+                Objsr  = round(300 - yred * 1.3)
                 e = rsr - Objsr
+                if -5 < e < 5:
+                    e = 0
+                u = e * kp1 + (e - e_old)*kd1
                 robot.text_to_frame(frame, "Red", 100, 100)
 
             if Flag_obj_green:
-                Objsr  = round(370 + ygr * 0.8)
+                if direction == "Orange":
+                    yright1 = 260 
+                    temp = 25
+                else:
+                    yleft1 = 260
+                    temp = 25
+                Objsr  = round(240 + ygr * 1.3)
                 e = gsr - Objsr
+                if -5 < e < 5:
+                    e = 0
+                u = e * kp1 + (e - e_old)*kd1
                 robot.text_to_frame(frame, "Green", 100, 100)
 
-            u = e * kp + (e - e_old)*kd
+            if t_y + 0.5 < time.time():
+                yleft1 = 190
+                temp = 0
+                yright1 = 190
+
             deg = int(rul - u)
-            if deg < 1100:
-                deg = 1100
+            if deg < -50:
+                deg = -50
                 
-            if deg > 2700:
-                deg = 2700
+            if deg > 50:
+                deg = 50
 
             e_old = e
+
             if Flag_obj_green == False and Flag_obj_red == False: 
                 if sr2 == 0:
-                    deg = 1100
+                    deg = -50
+                    speed = min_speed
 
                 if sr1 == 0:
-                    deg = 2600
+                    deg = 50
+                    speed = min_speed
 
-
+                if sr1 == 0 and sr2 == 0:
+                    speed = min_speed
+                    if direction == 'None':
+                        deg = 0
+                    elif direction == 'Orange':
+                        deg = -50
+                    else:
+                        deg = 50
+                
+            
             if Flag_line and tper + 0.5 < time.time(): 
                     per += 1
                     tper = time.time()
@@ -325,34 +381,68 @@ while True:
             
 
         if state == "Finish":
-            if t_finish + 2.3 > time.time():
+            if t_finish + 2.5 > time.time():
+                Objsr = 0
+                object_()
                 black_line()
-                e = sr1 - sr2-10
+
+                e = sr1 - sr2 - 10
                 if -5 < e < 5:
                     e = 0
                 u = e * kp + (e - e_old)*kd
-                deg = rul - u
-                
-                if deg < 1700:
-                    deg = 1700
-                
-                if deg > 2300:
-                    deg = 2300
+
+                if Flag_obj_red:
+                    Objsr  = round(300 - yred * 1.3)
+                    e = rsr - Objsr
+                    if -5 < e < 5:
+                        e = 0
+                    u = e * kp1 + (e - e_old)*kd1
+                    robot.text_to_frame(frame, "Red", 100, 100)
+
+                if Flag_obj_green:
+                    Objsr  = round(240 + ygr * 1.3)
+                    e = gsr - Objsr
+                    if -5 < e < 5:
+                        e = 0
+                    u = e * kp1 + (e - e_old)*kd1
+                    robot.text_to_frame(frame, "Green", 100, 100)
+
+                deg = int(rul - u)
+                if deg < -50:
+                    deg = -50
+                    
+                if deg > 50:
+                    deg = 50
+
                 e_old = e
 
-                if sr2 == 0:
-                    deg = 1700
+                if Flag_obj_green == False and Flag_obj_red == False: 
+                    if sr2 == 0:
+                        deg = -50
 
-                if sr1 == 0:
-                    deg = 2300
+                    if sr1 == 0:
+                        deg = 50
+
+                    if sr1 == 0 and sr2 == 0:
+                        if direction == 'None':
+                            deg = 0
+                        elif direction == 'Orange':
+                            deg = -50
+                        else:
+                            deg = 50
+                    
+                
             else:
                 speed = 0
+                max_speed = 0
+                min_speed = 0
                 deg = rul            
             
 
 
-
-        message = str(speed + 200) + str(deg + 1000) + '$'  
+        deg = -(deg + 13)
+        message = str(speed + 200) + str(deg + 2000) + '$'
+        speed = max_speed  
         if ii == 'B=0' and time_button + 1 < time.time():
             state = '0'
             deg = rul

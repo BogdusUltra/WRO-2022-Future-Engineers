@@ -23,6 +23,7 @@ For any program (![qualification.py](https://github.com/BogdusUltra/WRO-2022-Fut
 1) "0"; 
 2) "move";
 3) "finish".
+
 From the beginning the program is in state "0", it just waits for the information that the button has been pressed. If the button is pressed, the program moves to state "move".
 When the program moves to state "move" the main algorithm is started. The program processes the camera image using the cv2 library. It recognizes the black walls of the field and determines how much the robot has deviated from the planned route, it detects an error. Next, we calculate the angle by which to turn the servomotor using the formulas: 
 u = e * kp + (e - e_old) * kd

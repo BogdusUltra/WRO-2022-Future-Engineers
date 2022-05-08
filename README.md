@@ -19,19 +19,27 @@ The application also reports errors in the program, if any.
 ![autostart.py](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/main/autostart.py) is a programme that runs automatically as soon as RaspberryPi is switched on. It executes any program whose name appears in the code after import.
 For any program (![qualification.py](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/main/qualification.py) and ![final.py](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/main/final.py) in this case) to run when Raspberry Pi is switched on, we need to load it with ![start_robot.py](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/main/start_robot.py) and then load ![autostart.py](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/main/autostart.py).
 
-![qualification.py](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/main/qualification.py) is the program for the qualification stage. It is located on the Raspberry Pi. The program waits until information is received that a button has been pressed.
-After that, the basic algorithm is started.
-The program processes the camera image using the cv2 library. It detects the black walls of the field and determines how far the robot has strayed from the intended route, identifying the error. Next, we calculate the angle by which the servo motor needs to be rotated using the formulas:
+![qualification.py](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/main/qualification.py) is the program for the qualification stage. It is located on the Raspberry Pi. The program has 3 main positions(variable "state"): 
+1) "0"; 
+2) "move";
+3) "finish".
+From the beginning the program is in state "0", it just waits for the information that the button has been pressed. If the button is pressed, the program moves to state "move".
+When the program moves to state "move" the main algorithm is started. The program processes the camera image using the cv2 library. It recognizes the black walls of the field and determines how much the robot has deviated from the planned route, it detects an error. Next, we calculate the angle by which to turn the servomotor using the formulas: 
 u = e * kp + (e - e_old) * kd
 deg = rul - u,     
-where deg is required angle of servo motor rotation; rul is the initial angle of servo motor rotation at which wheels are aligned; u is difference between rul and deg; e is error; kp is proportional coefficient; kd is differential coefficient; e_old is past error(e) which is updated with each cycle iteration.
-After the mathematical calculations we send the values of the variables deg and speed (speed, it is set at the beginning of the program and does not change further on) to the pyboard via UART. This data is received by main.py.
-Also, the program counts how many turns the robot has done and after 12 turns, i.e. 3 laps, it stops. The sensors cannot detect a turn, but they can detect the blue and orange lines, they are on the turns.
+where deg is the required angle of servo motor rotation; rul is the initial angle of servo motor rotation at which the wheels are aligned; u is the difference between rul and deg; e is the error; kp is the proportional control coefficient; kd is the differential control coefficient; e_old is the past error(e) which is updated with each iteration of the cycle. Also, in this state the program counts how many turns the robot has made. The sensors can not recognize a turn, but they can recognize the blue and orange lines, they are on the turns. After 12 turns, i.e. 3 laps, the program switches to state "finish".
+State "finish" is the final phase of the program. In this state, just like in state "move", the program calculates the error and aligns the robot. But after a certain time it sets the value of the speed variable to 0.
+After the mathematical calculations we send the values of deg and speed (the speed variable which can change throughout the program) to the pyboard via UART. This data is received by the ![main.py](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/main/main.py) program.
 
 ![final.py](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/main/final.py) is the final stage program. It resides on the Raspberry Pi.
 final.py just like qualification.py waits for the button to be pressed, centres the robot and counts the laps travelled, but it also allows the robot to drive around traffic signs - green and red parallelepipeds. The robot needs to avoid the green objects on the left side and the red ones on the right.
 The program uses a sensor to look for red and green objects. If it finds a green object, it recognises it as the right-hand side of the field and hence the robot tries to drive between this area. If the sensor detects a red object, it similarly recognises it as a field wall, only on the left-hand side. Thanks to this algorithm, the robot successfully drives around the objects on the right sides.
 
+![final.py](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/main/final.py) is the final stage program. It resides on the Raspberry Pi.
+final.py just like qualification.py waits for the button to be pressed, aligns the robot to the center and counts the laps traveled, it has the same number of states. But it also allows the robot to drive around traffic signs - green and red parallelepipeds. The robot needs to bypass green objects on the left side and red ones on the right. 
+To do this, sensors have been added that look for red and green objects. If the sensor finds a green object, the program writes in the variables "gsr" and "ygr" the position of its upper left corner by x and y coordinate respectively. And if the sensor detects a red object, it will similarly write the position of its upper right corner into the variables "rsr" and "yred". If the sensor sees only a red object, the program will write the value True to the "Flag_obj_red" variable and if it sees only green, it will write the value to the "Flag_obj_green" variable. But if the sensor sees two objects at once it writes the value "True" in the variable of the object that is closer. 
+If any of these variables is True, the program calculates a new error that will allow the robot to align between the desired wall and the object.
+With this algorithm, the robot successfully bypasses the objects on the right sides.
 
 
 

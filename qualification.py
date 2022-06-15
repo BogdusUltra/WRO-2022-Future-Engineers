@@ -1,7 +1,9 @@
 from mimetypes import guess_all_extensions
+from operator import index
 from pdb import runcall
 import cv2
 import RobotAPI as rapi
+import RPi.GPIO as IO
 import numpy as np
 import serial
 import time
@@ -10,7 +12,11 @@ port = serial.Serial("/dev/ttyS0", baudrate=115200, stopbits=serial.STOPBITS_ONE
 robot = rapi.RobotAPI(flag_serial=False)
 robot.set_camera(100, 640, 480)
 
-message = '9999999$'
+IO.setwarnings(False)
+IO.setmode (IO.BCM)
+IO.setup(18,IO.IN) 
+
+message = '999999999$'
 state = '0'
 ii = ''
 fps = 0
@@ -23,11 +29,11 @@ xright2, yright2 = 640, 480
 xleft1, yleft1 = 0, 190
 xleft2, yleft2 = 20, 480
 
-xBl1, yBl1 = 320, 420
-xBl2, yBl2 = 350, 440
+xBl1, yBl1 = 290, 340
+xBl2, yBl2 = 320, 350
 
-xOl1, yOl1 = 290, 420
-xOl2, yOl2 = 320, 440
+xOl1, yOl1 = 320, 340
+xOl2, yOl2 = 350, 350
 
 xObj1, yObj1 = 50, 190
 xObj2, yObj2 = 590, 370
@@ -38,10 +44,13 @@ x1 = 1130
 x, y = 300, 200
 w, h = 40, 80
 a = ''
-speed = 50
-max_speed = 50
-min_speed = 50
+speed = 60
+max_speed = 60
+min_speed = 60
 t_cube = 0.2
+
+Right_color = 1
+Left_color = 1
 
 rul = 0
 deg = 0
@@ -63,11 +72,14 @@ Object_green = 0
 Object_red = 0
 temp = 0
 t_y = 0
+Right_color = 0
+Left_color = 0
 
 tper = time.time()
 t_obj =time.time()
 t_red = time.time()
 t_green = time.time()
+t_led = time.time()
 
 
 lowBl = np.array([93, 64, 21])
@@ -79,7 +91,7 @@ upOl = np.array([51, 255, 188]) #Проверить
 lowObjgreen = np.array([70, 200, 58])
 upObjgreen = np.array([85, 255, 138]) #Проверить
 
-lowObjred = np.array([0, 140, 6])
+lowObjred = np.array([0, 142, 6])
 upObjred = np.array([10, 255, 255]) #Проверить
 
 keyboardcontrol = 'None'
@@ -175,10 +187,21 @@ def orange_line():
 
 
 while True:
-
+    Button = (IO.input(18))
     frame = robot.get_frame(wait_new_frame=1)
 
     fps1 += 1
+
+    if t_led + 0.5 < time.time():
+        Right_color = 1
+        Left_color = 3
+    elif t_led + 1 < time.time():
+        Right_color = 2
+        Left_color = 2
+    elif t_led + 1.5 < time.time():
+        Left_color = 1
+        Right_color = 3
+
     if time.time() > fps_time + 1:
         fps_time = time.time()
         fps = fps1
@@ -186,16 +209,16 @@ while True:
 
     if state == '0':
         if Flag_button == False:
-            message = '9999999$'
+            message = '999999999$'
         else:
-            message = str(0 + 200) + str(rul + 2000) + '$'
-        if ii == 'B=0' and time_button + 1 < time.time():
+            message = str(0 + 200) + str(rul + 2000) + str(Right_color) + str(Left_color) + '$'
+        if Button == False and time_button + 1 < time.time():
             keyboardcontrol = 'Off'
             state = 'Move'
             direction = 'None'
             Flag_button = True
             time_button = time.time()
-        if ii == 'B=1':
+        if Button:
             pass
 
     if state != '0' and state != 'Stop':
@@ -240,19 +263,19 @@ while True:
             u = e * kp + (e - e_old)*kd
 
             deg = int(rul - u)
-            if deg < -50:
-                deg = -50
+            if deg < -45:
+                deg = -45
                 
-            if deg > 50:
-                deg = 50
+            if deg > 45:
+                deg = 45
 
             e_old = e
 
             if sr2 == 0:
-                deg = -20
+                deg = -35
 
             if sr1 == 0:
-                deg = 20
+                deg = 38
                 
             if Flag_line and tper + 0.5 < time.time(): 
                     per += 1
@@ -265,7 +288,7 @@ while True:
             
 
         if state == "Finish":
-            if t_finish + 2.5 > time.time():
+            if t_finish + 0.5 > time.time():
                 black_line()
                 e = sr1 - sr2
                 if -5 < e < 5:
@@ -283,10 +306,10 @@ while True:
                 e_old = e
 
                 if sr2 == 0:
-                    deg = -20
+                    deg = -35
 
                 if sr1 == 0:
-                    deg = 20
+                    deg = 38
                 
 
     
@@ -300,9 +323,9 @@ while True:
 
 
         deg = -(deg + 13)
-        message = str(speed + 200) + str(deg + 2000) + '$'
+        message = str(speed + 200) + str(deg + 2000) + str(Right_color) + str(Left_color) + '$'
         speed = max_speed  
-        if ii == 'B=0' and time_button + 1 < time.time():
+        if Button == False and time_button + 1 < time.time():
             state = '0'
             deg = rul
             time_button = time.time()
@@ -320,24 +343,8 @@ while True:
     port.write(message.encode('utf-8'))
 
 
-
-    if port.in_waiting > 0:
-        ii = ''
-        t = time.time()
-        while 1:
-            a = str(port.read(), 'utf-8')
-            if a != '$':
-                ii += a
-            else:
-                break
-            if t + 0.02 < time.time():
-                break
-        port.reset_input_buffer()
-
-
-
-    robot.text_to_frame(frame, 'fps = ' + str(fps), 500, 20)
-    robot.text_to_frame(frame, 'ii = ' + str(ii) + ' ' + 'state=' + str(state) + ' ' + str(message) + ' ' + str(direction) + ' ' + str(deg), 20, 20)
-    robot.text_to_frame(frame, 'e = ' + str(e) + ' ' + 'sr1=' + str(sr1) + ' ' + str(sr2) + ' ' + str(Flag_button) + ' ' + str(per) + ' ' + str(rsr) + ' ' + str(gsr), 20, 40)
-    robot.text_to_frame(frame, 'yr = ' + str(yred) + ' ' + 'yg=' + str(ygr) + ' ' + str(Objsr) + ' ' + str(Flag_obj_green) + ' ' + str(Flag_obj_red), 20, 60)
+    robot.text_to_frame(frame, 'fps = ' + str(fps) + ' ' + str(Button), 500, 20)
+    # robot.text_to_frame(frame, 'ii = ' + str(ii) + ' ' + 'state=' + str(state) + ' ' + str(message) + ' ' + str(direction) + ' ' + str(deg), 20, 20)
+    # robot.text_to_frame(frame, 'e = ' + str(e) + ' ' + 'sr1=' + str(sr1) + ' ' + str(sr2) + ' ' + str(Flag_button) + ' ' + str(per) + ' ' + str(rsr) + ' ' + str(gsr), 20, 40)
+    # robot.text_to_frame(frame, 'yr = ' + str(yred) + ' ' + 'yg=' + str(ygr) + ' ' + str(Objsr) + ' ' + str(Flag_obj_green) + ' ' + str(Flag_obj_red), 20, 60)
     robot.set_frame(frame, 40)

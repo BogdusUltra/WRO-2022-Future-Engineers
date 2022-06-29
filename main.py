@@ -12,15 +12,17 @@ Right_led_blue = Pin('X4', Pin.OUT_PP)
 Left_led_red = Pin('X3', Pin.OUT_PP)
 Left_led_green = Pin('X2', Pin.OUT_PP)
 Left_led_blue = Pin('X11', Pin.OUT_PP)
+# Инициализация светодиодов
 
 Motor = Pin('X10')
 M1 = Pin('Y10', Pin.OUT_PP)
 M2 = Pin('Y9', Pin.OUT_PP)
-
 tim = Timer(4, freq=10000)
 ms = tim.channel(2, Timer.PWM, pin=Motor)
+# Инициализация мотора
 
 Servo1 = pyb.Servo(1)
+# Инициализация серводвигателя
 
 inn = ""
 message = '000$'
@@ -36,32 +38,36 @@ flag_start = True
 e_old = 0
 
 
-def motor(sp):
+def motor(sp): # Функция управляющая мотором
     global M1, M2, ms
-    if sp < 0:
+    if sp < 0: # Если скорость меньше 0, то едем назад
         M1.low()
         M2.high()
-    else:
+    else: # Иначе вперед
         M1.high()
         M2.low()
-    ms.pulse_width_percent(abs(sp))
+    ms.pulse_width_percent(abs(sp)) # Управляет скоростью мотора
 
 t = pyb.millis()
+# Инициализаця таймера
+
 Right_led_red.high()
 Left_led_red.high()
-while True:
-    if flag_start:
+# Включение светодиодов
+
+while True: # Основной цикл программы
+    if flag_start: # Если True, то скорость мотора = 0 и серводвигатель ставится в 0
         rul = -13
         motor(0)
         Servo1.angle(rul)
 
-    if uart.any():
+    if uart.any(): # Фильтр, убирающий шум 
         a = chr(uart.readchar())
         if a != '$':
             inn += a
             if len(inn) > 10:
                 inn = ''
-        else:
+        else: # Ждем нужного сообщения - 999999999$
             if ONorOFF == 'off':
                 if inn == '999999999':
                     ONorOFF = 'on'
@@ -82,13 +88,13 @@ while True:
                     delay(50)
             if ONorOFF == 'on':
                 try:
-                    if len(inn) == 9 and inn != '999999999':
-                        speed = int(inn[:3]) - 200
-                        rul = int(inn[3:7]) - 2000
-                        Right_color = int(inn[7:8])
-                        Left_color = int(inn[8:9])
+                    if len(inn) == 9 and inn != '999999999': # Обрабатываем сообщение
+                        speed = int(inn[:3]) - 200 # Первые 3 символа - скорость
+                        rul = int(inn[3:7]) - 2000 # Следующие 4 символа - угол поворота серводвигателя
+                        Right_color = int(inn[7:8]) # Значение цвета светодиодов
+                        Left_color = int(inn[8:9]) # Значение цвета светодиодов
                         # print(serv_deg.read())
-                        if Right_color == 1:
+                        if Right_color == 1: 
                             Right_led_red.high()
                             Right_led_green.low()
                             Right_led_blue.low()
@@ -137,13 +143,14 @@ while True:
                             Left_led_red.low()
                             Left_led_green.low()
                             Left_led_blue.low()
+                        # Условия для зажигания светодиодов разными цветами
 
-                        inn = ''
-                        motor(speed)
-                        Servo1.angle(rul)
+                        inn = '' # отчистка сообщения
+                        motor(speed) #подаем скорость на функцию
+                        Servo1.angle(rul) #подаем угол поворота  на функцию
                 except ValueError:
                     print('err')
 
-            inn = ''
+            inn = '' # отчистка сообщения
 
 # 0 = 1125   100 = 0    -100 = 2815

@@ -8,6 +8,7 @@ The ![main.py](https://github.com/BogdusUltra/WRO-2022-Future-Engineers/blob/mai
 2. "Start": starts the last programme downloaded to the Raspberry Pi.
 3. "Stop": finishes execution of the program on Raspberry Pi.
 4. "Video": creates a separate window and displays the camera image there. 
+
 The application also reports errors in the program, if any.
 
 
